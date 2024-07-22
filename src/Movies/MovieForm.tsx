@@ -6,17 +6,23 @@ import { getMovie, saveMovie } from "../services/fakeMovieService";
 import Input from "./common/Input";
 import { Genres } from "./common/ListGroup";
 
+interface MovieFormState {
+  _id?: string;
+  title: string;
+  genreId: string;
+  numberInStock: number;
+  dailyRentalRate: number;
+}
 const MovieForm = () => {
-  const [data, setData] = useState<Movies>({
+  const [data, setData] = useState<MovieFormState>({
     title: "",
     genreId: "",
     numberInStock: 0,
     dailyRentalRate: 0,
-    genre: [],
   });
   const [genres, setGenres] = useState<Genres[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: any }>();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,20 +32,16 @@ const MovieForm = () => {
     if (id === "new") return;
 
     const movie = getMovie(id);
+
     if (!movie) return navigate("/not-found");
-
-    setData(mapToViewModel(movie));
-  }, [id, navigate]);
-
-  const mapToViewModel = (movie: Movies) => {
-    return {
+    setData({
       _id: movie._id,
       title: movie.title,
       genreId: movie.genre._id,
       numberInStock: movie.numberInStock,
       dailyRentalRate: movie.dailyRentalRate,
-    };
-  };
+    });
+  }, [id, navigate]);
 
   const validate = () => {
     const errors: { [key: string]: string } = {};

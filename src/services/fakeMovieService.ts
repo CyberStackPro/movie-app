@@ -1,13 +1,17 @@
-import * as genresAPI from "./fakeGenreService";
 
-const movies = [
+import * as genresAPI from "./fakeGenreService";
+import { Genre } from "./fakeGenreService.d";
+import { Movies } from "./fakeMovieService.d";
+import { genres } from "./fakeGenreService";
+
+const movies: Movies[] = [
   {
     _id: "5b21ca3eeb7f6fbccd471815",
     title: "Terminator",
     genre: { _id: "5b21ca3eeb7f6fbccd471818", name: "Action" },
     numberInStock: 6,
     dailyRentalRate: 2.5,
-    publishDate: "2018-01-03T19:04:28.809Z",
+    // publishDate: "2018-01-03T19:04:28.809Z",
     liked: true,
   },
   {
@@ -68,20 +72,21 @@ const movies = [
   },
 ];
 
-export function getMovies() {
+export function getMovies(): Movies[] {
   return movies;
 }
 
-export function getMovie(id) {
+export function getMovie(id: string): Movies | undefined {
   return movies.find((m) => m._id === id);
 }
 
-export function saveMovie(movie) {
-  let movieInDb = movies.find((m) => m._id === movie._id) || {};
-  movieInDb.title = movie.title;
-  movieInDb.genre = genresAPI.genres.find((g) => g._id === movie.genreId);
-  movieInDb.numberInStock = movie.numberInStock;
-  movieInDb.dailyRentalRate = movie.dailyRentalRate;
+export function saveMovie(movie: Partial<Movies>): Movies {
+  let movieInDb = movies.find((m) => m._id === movie._id) || {} as Movies;
+  movieInDb.title = movie.title || movieInDb.title;
+  movieInDb.genre = genres.find((g) => g._id === movie.genreId) || movieInDb.genre;
+  movieInDb.genreId = movie.genreId || movieInDb.genreId;
+  movieInDb.numberInStock = movie.numberInStock || movieInDb.numberInStock;
+  movieInDb.dailyRentalRate = movie.dailyRentalRate || movieInDb.dailyRentalRate;
 
   if (!movieInDb._id) {
     movieInDb._id = Date.now().toString();
@@ -91,8 +96,11 @@ export function saveMovie(movie) {
   return movieInDb;
 }
 
-export function deleteMovie(id) {
-  let movieInDb = movies.find((m) => m._id === id);
-  movies.splice(movies.indexOf(movieInDb), 1);
-  return movieInDb;
+export function deleteMovie(id: string): Movies | any {
+  const movieInDb = movies.find((m) => m._id === id);
+  if (movieInDb) {
+    movies.splice(movies.indexOf(movieInDb), 1);
+    return movieInDb;
+  }
+  return undefined;
 }

@@ -3,14 +3,15 @@ import Input from "./common/Input";
 import { ZodError, z } from "zod";
 
 const schema = z.object({
-  username: z.string().email('"Username" must be a valid email'),
+  username: z.string().email("Username must be a valid email"),
   password: z
     .string()
-    .min(5, { message: "Password must be at least 5 character" }),
-  name: z.string(),
+    .min(5, { message: "Password must be at least 5 characters" }),
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
 });
 
 type FormSchema = z.infer<typeof schema>;
+
 const RegisterForms = () => {
   const [users, setUser] = useState<FormSchema>({
     username: "",
@@ -18,30 +19,51 @@ const RegisterForms = () => {
     name: "",
   });
 
-  const [errors, setErrors] = useState<Partial<FormSchema>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof FormSchema, string>>
+  >({});
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { value, name } = event.target;
+    const { name, value } = event.target;
     setUser({ ...users, [name]: value });
 
+    // try {
+    //   schema.pick({ [name]: true }).parse({ [name]: value });
+    //   setErrors((prev) => ({ ...prev, [name]: undefined }));
+    // } catch (error) {
+    //   if (error instanceof ZodError) {
+    //     setErrors((prev) => ({
+    //       ...prev,
+    //       [name]: error.errors[0].message,
+    //     }));
+    //   }
+    // }
+  };
+
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
     try {
-      schema.pick({ [name]: true }).parse({ [name]: value });
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
+      schema.parse(users);
+      console.log(users);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        setErrors((prev) => ({ ...prev, [name]: error.errors[0].message }));
+      if (error instanceof ZodError) {
+        const formErrors: Partial<Record<keyof FormSchema, string>> = {};
+        error.errors.forEach((err) => {
+          const path = err.path[0] as keyof FormSchema;
+          formErrors[path] = err.message;
+        });
+        setErrors(formErrors);
       }
     }
   };
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    console.log(users);
-  };
+
   const isDisabled = () => {
-    for (let key in users) if ((key, users[key]) === "") return true;
+    for (let key in users)
+      if (users[key as keyof FormSchema] === "") return true;
     return false;
   };
-  const renderInput = (name: string, label: string, type: string) => {
+
+  const renderInput = (name: keyof FormSchema, label: string, type: string) => {
     return (
       <Input
         name={name}
@@ -59,7 +81,6 @@ const RegisterForms = () => {
       {renderInput("username", "Username", "text")}
       {renderInput("password", "Password", "password")}
       {renderInput("name", "Name", "text")}
-
       <button disabled={isDisabled()} className="btn btn-primary">
         Submit
       </button>

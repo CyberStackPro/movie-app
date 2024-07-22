@@ -10,10 +10,11 @@ export interface MovieGenre {
 }
 export interface Movies {
   _id: string;
-  title: string;
-  genre: MovieGenre;
-  numberInStock: number;
-  dailyRentalRate: number;
+  title?: string;
+  genre?: MovieGenre;
+  genreId?: string;
+  numberInStock?: number;
+  dailyRentalRate?: number;
   liked?: boolean | undefined;
 }
 export interface SortColumn {

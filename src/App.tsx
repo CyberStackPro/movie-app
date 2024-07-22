@@ -108,9 +108,6 @@ import NotFound from "./Movies/NotFound";
 import MovieForm from "./Movies/MovieForm";
 import LoginForm from "./Movies/LoginForm";
 import RegisterForms from "./Movies/RegisterForms";
-import NewMovie from "./Movies/NewMovie";
-import { useState } from "react";
-import { Movies } from "./Movies/MovieTable";
 
 const App = () => {
   return (

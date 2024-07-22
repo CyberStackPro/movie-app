@@ -1,14 +1,7 @@
-import Input from "./Input";
+import React from "react";
 
-export const renderInput = (name: string, label: string, type: string) => {
-  return (
-    <Input
-      name={name}
-      label={label}
-      type={type}
-      // error={errors[name]}
-      onChange={handleChange}
-      value={users[name]}
-    />
-  );
+const form = () => {
+  return <div>form</div>;
 };
+
+export default form;

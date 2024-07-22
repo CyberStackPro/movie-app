@@ -32,10 +32,10 @@ const MoviesApp = () => {
 
     if (searchQuery) {
       filteredMovies = movies.filter((m) =>
-        m.title.toLowerCase().startsWith(searchQuery.toLowerCase())
+        m.title?.toLowerCase().startsWith(searchQuery.toLowerCase())
       );
     } else if (selectedGenre && selectedGenre._id) {
-      filteredMovies = movies.filter((m) => m.genre._id === selectedGenre._id);
+      filteredMovies = movies.filter((m) => m.genre?._id === selectedGenre._id);
     }
 
     const sorted = _.orderBy(

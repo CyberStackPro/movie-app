@@ -1,27 +1,45 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import Input from "./common/Input";
-import { z } from "zod";
+import { ZodError, z } from "zod";
 
 const schema = z.object({
   name: z
     .string()
-    .min(2, { message: "Name must be at least 2 character" })
+    .min(2, { message: "Name must be at least 2 characters" })
     .trim(),
-  password: z.string().min(3),
+  password: z
+    .string()
+    .min(3, { message: "Password must be at least 3 characters" }),
 });
 
 type FormData = z.infer<typeof schema>;
+
 const LoginForm = () => {
   const [account, setAccount] = useState<FormData>({
     name: "",
     password: "",
   });
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>(
+    {}
+  );
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    console.log(account);
+    try {
+      schema.parse(account);
+      console.log(account);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const formErrors: Partial<Record<keyof FormData, string>> = {};
+        error.errors.forEach((err) => {
+          const path = err.path[0] as keyof FormData;
+          formErrors[path] = err.message;
+        });
+        setErrors(formErrors);
+      }
+    }
   };
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setAccount({
@@ -29,14 +47,17 @@ const LoginForm = () => {
       [name]: value,
     });
 
-    try {
-      schema.pick({ [name]: true }).parse({ [name]: value });
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        setErrors((prev) => ({ ...prev, [name]: error.errors[0].message }));
-      }
-    }
+    // try {
+    //   schema.pick({ [name]: schema?.shape?[name] }).parse({ [name]: value });
+    //   setErrors((prev) => ({ ...prev, [name]: undefined }));
+    // } catch (error) {
+    //   if (error instanceof ZodError) {
+    //     setErrors((prev) => ({
+    //       ...prev,
+    //       [name]: error.errors[0].message,
+    //     }));
+    //   }
+    // }
   };
 
   return (
